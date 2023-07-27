@@ -3,6 +3,8 @@ using POMDPs
 using Random
 using Colors
 
+## Version continuous space 27 juillet 2023
+
 mutable struct Robot{D} <: AbstractAgent
     id::Int
     pos::NTuple{D,Float64}
