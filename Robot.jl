@@ -3,17 +3,14 @@ using POMDPs
 using Random
 using Colors
 
-## Version continuous space 27 juillet 2023
+## Version gridSpace
 
 mutable struct Robot{D} <: AbstractAgent
     id::Int
-    pos::NTuple{D,Float64}
-    vel::NTuple{D,Float64}
-    θ::Float64
-    θ̇::Float64
+    pos::NTuple{D,Int}
+    vel::NTuple{D,Int}
     vis_range::Float64
     com_range::Float64
-    r::Float64 #radius of av size of the robot
     alive::Bool 
     isObstacle::Bool
     occupancy_gridmap::Matrix{Int64}
