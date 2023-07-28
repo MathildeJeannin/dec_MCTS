@@ -16,6 +16,9 @@ mutable struct Robot{D} <: AbstractAgent
     # tree::MDP{Int64,Int64}
 end
 
+# struct tree <: MDP{Int, Int}
+# end
+
 
 function initialize_model(;
     N = 10,                # number of agents
@@ -50,6 +53,8 @@ function initialize_model(;
         # get random position in a 10x10 beginning zone
         pos = Tuple(rand(model.rng, 1:begin_zone[i]) for i in 1:D)
         # initialize the agents with argument values and no heading change
+        # tree = MDP{}
+
         agent = Robot{D}(n, pos, vis_range, com_range, true, false, fill(-2, extent))
         add_agent!(agent, pos, model)  
     end
@@ -71,11 +76,10 @@ end
 function gridmap_update(robot, model)
     # gridmap : -2 if unknown, -1 if occupied, 0 if free
     scan = nearby_positions(robot.pos, model, robot.vis_range)
-    neighbours = nearby_agents(robot, model, robot.vis_range) #like a lidar scan
+    neighbours = nearby_agents(robot, model, robot.vis_range) 
+    #like a lidar scan
     pos_neighbours = Array{Tuple{Int, Int}}(undef, 0)
-    # isObs_neighbours = Array{Bool}(undef, length(neighbours))
     for n in neighbours
-        # pos_neighbours[n.id] = (n.pos[1],n.pos[2])
         push!(pos_neighbours, (n.pos[1],n.pos[2]))
     end
 
@@ -90,22 +94,35 @@ end
 
 
 
-model = initialize_model(;
-    N = 10,                 # number of agents
-    extent = (100,100),  # size of the world
-    begin_zone = (10,10),
-    vis_range = 5.,       # visibility range
-    com_range = 5.,       # communication range
-    δt = 0.01,             # time step of the model
-    seed = 1
-)
+# function MCTS(robot, model)
 
-robots = allagents(model)
-add_obstacles(model)
+# end
 
-for r in robots
-    if !r.isObstacle
-        gridmap_update(r, model)
-        # println(r.occupancy_gridmap[1:10,1:10])
+
+
+function agent_step!(robot, model)
+    if !robot.isObstacle
+        gridmap_update(robot, model)
+        robot.pos = (robot.pos[1]+1, robot.pos[2])
     end
 end
+
+
+# model = initialize_model(;
+#     N = 10,                 # number of agents
+#     extent = (100,100),  # size of the world
+#     begin_zone = (10,10),
+#     vis_range = 5.,       # visibility range
+#     com_range = 5.,       # communication range
+#     δt = 0.01,             # time step of the model
+#     seed = 1
+# )
+
+# robots = allagents(model)
+# add_obstacles(model)
+
+# for r in robots
+#     if !r.isObstacle
+#         gridmap_update(r, model)
+#     end
+# end
