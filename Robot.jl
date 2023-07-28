@@ -3,7 +3,7 @@ using POMDPs
 using Random
 using Colors
 
-include("MCTS.jl")
+include("MDP.jl")
 
 ## Version gridSpace
 
@@ -15,7 +15,7 @@ mutable struct Robot{D} <: AbstractAgent
     alive::Bool 
     isObstacle::Bool
     occupancy_gridmap::Matrix{Int8}
-    tree::MDP{Int64,Int64}
+    # tree::MDP{Int64,Int64}
 end
 
 # struct tree <: MDP{Int, Int}
@@ -96,9 +96,9 @@ end
 
 
 
-function MCTS(robot, model)
+# function MCTS(robot, model)
 
-end
+# end
 
 
 
