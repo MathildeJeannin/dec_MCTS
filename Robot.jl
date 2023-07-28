@@ -16,13 +16,6 @@ mutable struct Robot{D} <: AbstractAgent
     # tree::MDP{Int64,Int64}
 end
 
-# mutable struct Obstacles{D} <: Objects
-#     id::Int
-#     pos::NTuple{D,Float64}
-#     radius::Float64
-#     isObstacle::Bool
-# end
-
 
 function initialize_model(;
     N = 10,                # number of agents
@@ -57,7 +50,7 @@ function initialize_model(;
         # get random position in a 10x10 beginning zone
         pos = Tuple(rand(model.rng, 1:begin_zone[i]) for i in 1:D)
         # initialize the agents with argument values and no heading change
-        agent = Robot{D}(n, pos, vis_range, com_range, true, false, fill(-3, extent))
+        agent = Robot{D}(n, pos, vis_range, com_range, true, false, fill(-2, extent))
         add_agent!(agent, pos, model)  
     end
 
@@ -69,30 +62,30 @@ function add_obstacles(model; N = 10, extent = (100,100))
     D = length(extent)
     for i in 1:N
         pos = Tuple(rand(model.rng, 1:extent[i]) for i in 1:D)
-        obs = Robot{D}(nagents(model)+1, pos, 0, 0, false, true, Array{Int64}(undef, 0 ,0))
+        obs = Robot{D}(nagents(model)+1, pos, 0, 0, false, true, Array{Int8}(undef, 0 ,0))
         add_agent!(obs, pos, model)
     end
 end
 
 
 function gridmap_update(robot, model)
-    # gridmap : -3 if unknown, -2 if occupied by obs, -1 if occupied by robot, 0 if free
+    # gridmap : -2 if unknown, -1 if occupied, 0 if free
+    scan = nearby_positions(robot.pos, model, robot.vis_range)
     neighbours = nearby_agents(robot, model, robot.vis_range) #like a lidar scan
-    
-    # for n in neighbours    
-    #     # test 8 points on the circle of radius r around the obstacle to fill gridmap
-    #     neighbour_centerCell = (trunc(n.pos[1]), trunc(n.pos[2]))
-    #     for i in 0:7
-    #         α = i*π/4
-    #         neighbour_extendedCell = (trunc(Int, n.pos[1]+n.r*cos(α)), trunc(Int, n.pos[2]+n.r*sin(α)))
-    #         if neighbour_centerCell != neighbour_extendedCell
-    #             robot.occupancy_gridmap[neighbour_extendedCell[1]+1, neighbour_extendedCell[2]+1] = n.isObstacle ? -2 : -1 
-    #         end
-    #     end
-    # end
+    pos_neighbours = Array{Tuple{Int, Int}}(undef, 0)
+    # isObs_neighbours = Array{Bool}(undef, length(neighbours))
+    for n in neighbours
+        # pos_neighbours[n.id] = (n.pos[1],n.pos[2])
+        push!(pos_neighbours, (n.pos[1],n.pos[2]))
+    end
 
-    # for 
-
+    for cell in scan
+        if (cell[1],cell[2]) in pos_neighbours
+            robot.occupancy_gridmap[cell[1],cell[2]] = -1
+        else
+            robot.occupancy_gridmap[cell[1],cell[2]] = 0
+        end
+    end
 end
 
 
@@ -113,5 +106,6 @@ add_obstacles(model)
 for r in robots
     if !r.isObstacle
         gridmap_update(r, model)
+        # println(r.occupancy_gridmap[1:10,1:10])
     end
 end
